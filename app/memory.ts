@@ -15,15 +15,15 @@ export class MemoryStore {
     this.store.set(key, { value, expirationTime, createdDate: new Date() });
   }
 
-  get(key: string): unknown | undefined {
+  get<T = unknown>(key: string): T | undefined {
     const item = this.store.get(key);
     if (item) {
-      if (!item.expirationTime) return item.value;
+      if (!item.expirationTime) return <T>item.value;
       else if (
         item.expirationTime &&
         item.createdDate.getTime() + item.expirationTime > new Date().getTime()
       ) {
-        return item.value;
+        return <T>item.value;
       } else {
         this.delete(key);
       }

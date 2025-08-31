@@ -1,4 +1,3 @@
-import { serve } from "bun";
 import { serverStore } from "../../store";
 
 export function rpush(args: string[]) {
@@ -7,14 +6,13 @@ export function rpush(args: string[]) {
   const key = args.shift() ?? "";
   const values = args;
 
-  const dataStored = serverStore.get(key);
-  let newData: string[];
+  let data = serverStore.get<string[]>(key);
 
-  if (dataStored && dataStored instanceof Array) {
-    newData = [...dataStored, ...values];
+  if (data && data instanceof Array) {
+    data.push(...values);
   } else {
-    newData = [...values];
+    data = [...values];
   }
 
-  return `:${newData.length}\r\n`;
+  return `:${data.length}\r\n`;
 }
