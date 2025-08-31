@@ -16,7 +16,7 @@ class Command {
         if (!nextCommand) throw "ECHO is mailformed";
         return `$${nextCommand.command.length}\r\n${nextCommand.command}\r\n`
       case "PING":
-        return `\r\nPONG\r\n`;
+        return `+PONG\r\n`;
       default:
         return '';
     }
