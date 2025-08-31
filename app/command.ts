@@ -26,13 +26,19 @@ export class Command {
       case CommandType.PING:
         return `+PONG\r\n`;
       case CommandType.SET:
-        if (!this.params || this.params.length !== 2) throw "SET is mailformed";
-        serverStore.set(this.params[0], this.params[1]);
+        if (!this.params || this.params.length < 2) throw "SET is mailformed";
+        serverStore.set(
+          this.params[0],
+          this.params[1],
+          this.params.length === 3 ? +this.params[3] : undefined
+        );
         return "+OK\r\n";
       case CommandType.GET:
         if (!this.params || this.params.length !== 1) throw "GET is mailformed";
         const storedValue = serverStore.get(this.params[0]);
-        return storedValue ? `$${storedValue.length}\r\n${storedValue}\r\n` : '$-1\r\n';
+        return storedValue
+          ? `$${storedValue.length}\r\n${storedValue}\r\n`
+          : "$-1\r\n";
       default:
         return "";
     }
