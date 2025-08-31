@@ -1,15 +1,25 @@
 import * as net from "net";
+import { RedisProtocol } from "./redis-protocol";
 
 const server: net.Server = net.createServer((connection: net.Socket) => {
   connection.on("data", (data) => {
-    console.log("[server] received: " + data.toString());
+    console.log("[server] received: " + data);
 
-    // const commands = data.toString().split("\n");
+    const redisProtocol = new RedisProtocol(data.toString());
+    const commands = redisProtocol.deserialize();
 
-    // commands.forEach((command) => {
-    //   console.log("[server] processing command ");
-      connection.write("+PONG\r\n");
-    // });
+    console.log(
+      "[server] commands",
+      commands.map((command) => command.command)
+    );
+
+    commands.forEach((command, index) => {
+      const commandToWrite = command.runCommand(commands[index + 1]);
+      console.log("command to write:", commandToWrite);
+      if (commandToWrite) {
+        connection.write(commandToWrite);
+      }
+    });
   });
 });
 
