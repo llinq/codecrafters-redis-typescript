@@ -14,5 +14,7 @@ export function rpush(args: string[]) {
     data = [...values];
   }
 
+  serverStore.set(key, data);
+
   return `:${data.length}\r\n`;
 }
