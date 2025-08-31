@@ -18,6 +18,8 @@ export class RedisProtocol {
       const commandType =
         text.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
 
+        console.log('-- comand type', commandType);
+
       commands.push(new Command(commandType.toUpperCase() as CommandType));
     }
 
