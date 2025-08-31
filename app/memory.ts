@@ -21,7 +21,7 @@ export class MemoryStore {
       if (!item.expirationTime) return item.value;
       else if (
         item.expirationTime &&
-        item.createdDate.getTime() + item.expirationTime < new Date().getTime()
+        item.createdDate.getTime() + item.expirationTime > new Date().getTime()
       )
         return item.value;
       else {
