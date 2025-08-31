@@ -1,6 +1,7 @@
 import { echo } from "./base/echo";
 import { get } from "./base/get";
 import { ping } from "./base/ping";
+import { rpush } from "./base/rpush";
 import { set } from "./base/set";
 
 export enum CommandType {
@@ -8,6 +9,7 @@ export enum CommandType {
   ECHO = "ECHO",
   SET = "SET",
   GET = "GET",
+  RPUSH = "RPUSH",
 }
 
 export class Command {
@@ -29,6 +31,8 @@ export class Command {
         return set(this.args);
       case CommandType.GET:
         return get(this.args);
+      case CommandType.RPUSH:
+        return rpush(this.args);
       default:
         return "";
     }

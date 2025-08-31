@@ -1,5 +1,5 @@
 type MemoryState = {
-  value: string;
+  value: unknown;
   createdDate: Date;
   expirationTime?: number;
 };
@@ -11,11 +11,11 @@ export class MemoryStore {
     this.store = new Map();
   }
 
-  set(key: string, value: string, expirationTime?: number): void {
+  set(key: string, value: unknown, expirationTime?: number): void {
     this.store.set(key, { value, expirationTime, createdDate: new Date() });
   }
 
-  get(key: string): string | undefined {
+  get(key: string): unknown | undefined {
     const item = this.store.get(key);
     if (item) {
       if (!item.expirationTime) return item.value;
@@ -32,5 +32,9 @@ export class MemoryStore {
 
   delete(key: string): boolean {
     return this.store.delete(key);
+  }
+
+  has(key: string): boolean {
+    return this.store.has(key);
   }
 }
