@@ -11,24 +11,24 @@ export enum CommandType {
 }
 
 export class Command {
-  commandType: CommandType;
-  params: string[];
+  type: CommandType;
+  args: string[];
 
-  constructor(commandType: CommandType, params?: string[]) {
-    this.commandType = commandType;
-    this.params = params ?? [];
+  constructor(type: CommandType, args?: string[]) {
+    this.type = type;
+    this.args = args ?? [];
   }
 
   runCommand(): string {
-    switch (this.commandType) {
+    switch (this.type) {
       case CommandType.ECHO:
-        return echo(this.params);
+        return echo(this.args);
       case CommandType.PING:
         return ping();
       case CommandType.SET:
-        return set(this.params);
+        return set(this.args);
       case CommandType.GET:
-        return get(this.params);
+        return get(this.args);
       default:
         return "";
     }

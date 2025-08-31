@@ -8,7 +8,7 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
     const redisProtocol = new RedisProtocol(data.toString());
     const command = redisProtocol.deserialize();
 
-    console.log("[server] command", command.commandType, command.params);
+    console.log("[server] command", command.type, command.args);
 
     const commandToWrite = command.runCommand();
     console.log("[server] command to write:", commandToWrite);

@@ -22,8 +22,9 @@ export class RedisProtocol {
     }
 
     if (commands.length === 0) throw "Invalid command";
+
     const commandType = commands.shift() as CommandType;
-    const commandParams = commands;
-    return new Command(commandType, commandParams);
+    const commandArgs = commands;
+    return new Command(commandType, commandArgs);
   }
 }
