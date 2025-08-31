@@ -1,5 +1,8 @@
 import * as net from "net";
 import { RedisProtocol } from "./redis-protocol";
+import { MemoryStore } from "./memory";
+
+const serverStore = new MemoryStore();
 
 const server: net.Server = net.createServer((connection: net.Socket) => {
   connection.on("data", (data) => {
@@ -10,11 +13,11 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
 
     console.log(
       "[server] commands",
-      commands.map((command) => command.command)
+      commands.map((command) => command.commandType)
     );
 
     commands.forEach((command, index) => {
-      const commandToWrite = command.runCommand(commands[index + 1]);
+      const commandToWrite = command.runCommand();
       console.log("command to write:", commandToWrite);
       if (commandToWrite) {
         connection.write(commandToWrite);

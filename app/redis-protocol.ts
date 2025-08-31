@@ -1,27 +1,4 @@
-enum CommandType {
-  PING = "PING",
-  ECHO = "ECHO",
-}
-
-class Command {
-  command: string;
-
-  constructor(command: string) {
-    this.command = command;
-  }
-
-  runCommand(nextCommand?: Command): string {
-    switch (this.command) {
-      case "ECHO":
-        if (!nextCommand) throw "ECHO is mailformed";
-        return `$${nextCommand.command.length}\r\n${nextCommand.command}\r\n`
-      case "PING":
-        return `+PONG\r\n`;
-      default:
-        return '';
-    }
-  }
-}
+import { Command, CommandType } from "./command";
 
 export class RedisProtocol {
   data: string;
@@ -35,11 +12,21 @@ export class RedisProtocol {
     const commands: Command[] = [];
 
     for (let index = 0; index < commandsSize; index++) {
-      const commandLength = this.data.match(/\$(\d+)\r\n/)?.[1] ?? 0;
-      const command =
-        this.data.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
-      commands.push(new Command(command));
-      this.data = this.data.split(command)?.[1] ?? this.data;
+      let text = this.data.split("$")[index];
+
+      const commandLength = text.match(/(\d+)\r\n/)?.[1] ?? 0;
+      const commandType = text.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
+
+      text = text.split(commandType)?.[1] ?? text;
+
+
+
+      const commandParams = text.matchAll(/\r\n$/);
+
+      console.log('[server] command type: ' + commandType);
+      console.log('[server] command params: ' + commandParams);
+
+      commands.push(new Command(commandType.toUpperCase() as CommandType));
     }
 
     return commands;
