@@ -30,15 +30,7 @@ export class MemoryStore {
     }
   }
 
-  has(key: string): boolean {
-    return this.store.has(key);
-  }
-
   delete(key: string): boolean {
     return this.store.delete(key);
-  }
-
-  clear(): void {
-    this.store.clear();
   }
 }

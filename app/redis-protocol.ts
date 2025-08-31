@@ -1,4 +1,4 @@
-import { Command, CommandType } from "./command";
+import { Command, CommandType } from "./commands/command";
 
 export class RedisProtocol {
   data: string;
