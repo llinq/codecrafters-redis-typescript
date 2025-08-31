@@ -3,7 +3,7 @@ import { RedisProtocol } from "./redis-protocol";
 import "./command/registry";
 
 const server: net.Server = net.createServer((connection: net.Socket) => {
-  connection.on("data", (data) => {
+  connection.on("data", async (data) => {
     console.log("[server] received: " + data);
 
     const redisProtocol = new RedisProtocol(data.toString());
@@ -11,7 +11,7 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
 
     console.log("[server] command", command.type, command.args);
 
-    const commandToWrite = command.run();
+    const commandToWrite = await command.run();
     console.log("[server] command to write:", commandToWrite);
     if (commandToWrite) {
       connection.write(commandToWrite);
