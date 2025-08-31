@@ -9,20 +9,15 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
     console.log("[server] received: " + data);
 
     const redisProtocol = new RedisProtocol(data.toString());
-    const commands = redisProtocol.deserialize();
+    const command = redisProtocol.deserialize();
 
-    console.log(
-      "[server] commands",
-      commands.map((command) => command.commandType)
-    );
+    console.log("[server] command", command.commandType, command.params);
 
-    commands.forEach((command, index) => {
-      const commandToWrite = command.runCommand();
-      console.log("command to write:", commandToWrite);
-      if (commandToWrite) {
-        connection.write(commandToWrite);
-      }
-    });
+    const commandToWrite = command.runCommand();
+    console.log("command to write:", commandToWrite);
+    if (commandToWrite) {
+      connection.write(commandToWrite);
+    }
   });
 });
 

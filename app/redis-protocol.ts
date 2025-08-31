@@ -7,19 +7,23 @@ export class RedisProtocol {
     this.data = data;
   }
 
-  deserialize(): Command[] {
+  deserialize(): Command {
     const commandsSize = +(this.data.match(/^\*(.*)/)?.[1] ?? 1);
-    const commands: Command[] = [];
+    const commands: string[] = [];
 
     for (let index = 0; index < commandsSize; index++) {
       const commandLength = this.data.match(/\$(\d+)\r\n/)?.[1] ?? 0;
       const command =
         this.data.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
-
-      commands.push(new Command(command as CommandType));
-      this.data = this.data.split(command)?.[1] ?? this.data;
+      if (command) {
+        commands.push(command);
+        this.data = this.data.split(command)?.[1] ?? this.data;
+      }
     }
 
-    return commands;
+    if (commands.length === 0) throw "Invalid command";
+    const commandType = commands.shift() as CommandType;
+    const commandParams = commands;
+    return new Command(commandType, commandParams);
   }
 }
