@@ -30,7 +30,7 @@ export class Command {
         serverStore.set(
           this.params[0],
           this.params[1],
-          this.params.length === 3 ? +this.params[3] : undefined
+          this.params.length > 3 ? +this.params[3] : undefined
         );
         return "+OK\r\n";
       case CommandType.GET:
