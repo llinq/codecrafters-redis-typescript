@@ -12,15 +12,12 @@ export class RedisProtocol {
     const commands: Command[] = [];
 
     for (let index = 0; index < commandsSize; index++) {
-      const text = this.data.split("$")[index];
+      const commandLength = this.data.match(/\$(\d+)\r\n/)?.[1] ?? 0;
+      const command =
+        this.data.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
 
-      const commandLength = text.match(/\$(\d+)\r\n/)?.[1] ?? 0;
-      const commandType =
-        text.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
-
-        console.log('-- comand type', commandType);
-
-      commands.push(new Command(commandType.toUpperCase() as CommandType));
+      commands.push(new Command(command as CommandType));
+      this.data = this.data.split(command)?.[1] ?? this.data;
     }
 
     return commands;
