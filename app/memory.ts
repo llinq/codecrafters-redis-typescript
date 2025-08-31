@@ -12,6 +12,7 @@ export class MemoryStore {
   }
 
   set(key: string, value: string, expirationTime?: number): void {
+    console.log("-- set", key, expirationTime);
     this.store.set(key, { value, expirationTime, createdDate: new Date() });
   }
 
