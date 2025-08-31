@@ -1,3 +1,4 @@
+import { serve } from "bun";
 import { serverStore } from "./store";
 
 export enum CommandType {
@@ -29,7 +30,9 @@ export class Command {
         serverStore.set(this.params[0], this.params[1]);
         return "+OK\r\n";
       case CommandType.GET:
-        return "";
+        if (!this.params || this.params.length !== 1) throw "GET is mailformed";
+        const storedValue = serverStore.get(this.params[0]);
+        return storedValue ? `$${storedValue.length}\r\n${storedValue}\r\n` : '$-1\r\n';
       default:
         return "";
     }
