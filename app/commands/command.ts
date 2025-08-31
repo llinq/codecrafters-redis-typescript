@@ -1,5 +1,6 @@
 import { echo } from "./base/echo";
 import { get } from "./base/get";
+import { lpush } from "./base/lpush";
 import { lrange } from "./base/lrange";
 import { ping } from "./base/ping";
 import { rpush } from "./base/rpush";
@@ -12,6 +13,7 @@ export enum CommandType {
   GET = "GET",
   RPUSH = "RPUSH",
   LRANGE = "LRANGE",
+  LPUSH = "LPUSH",
 }
 
 export class Command {
@@ -37,6 +39,8 @@ export class Command {
         return rpush(this.args);
       case CommandType.LRANGE:
         return lrange(this.args);
+      case CommandType.LPUSH:
+        return lpush(this.args);
       default:
         return "";
     }
