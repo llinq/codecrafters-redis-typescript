@@ -14,18 +14,29 @@ export class LpopCommand implements Command {
   }
 
   run(): string {
-    if (this.args.length !== 1) throw "LPOP command is invalid";
+    if (this.args.length < 1) throw "LPOP command is invalid";
 
     const [key] = this.args;
+    const removeLength = this.args[1] ? +this.args[1] : 1;
 
     const data = serverStore.get<string[]>(key);
 
     if (!data || data.length === 0) return EMPTY;
 
-    const firstElement = data.shift();
+    const response: string[] = [];
+
+    for (let index = 0; index < removeLength; index++) {
+      const item = data.shift();
+      if (item) response.push(item);
+    }
 
     serverStore.set(key, data);
 
-    return `$${firstElement?.length}\r\n${firstElement}\r\n`;
+    if (response.length === 1)
+      return `$${response[0].length}\r\n${response[0]}\r\n`;
+    else
+      return `*${response.length}\r\n${response
+        .map((item) => `$${item.length}\r\n${item}\r\n`)
+        .join("")}`;
   }
 }
