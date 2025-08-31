@@ -24,7 +24,10 @@ export class MemoryStore {
         item.createdDate.getTime() + item.expirationTime < new Date().getTime()
       )
         return item.value;
-      else this.delete(key);
+      else {
+        console.log("key expired");
+        this.delete(key);
+      }
     }
   }
 
