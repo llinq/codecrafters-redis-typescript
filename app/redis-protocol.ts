@@ -17,7 +17,9 @@ export class RedisProtocol {
         this.data.match(`\r\n(.{${commandLength}})\r\n`)?.[1] ?? "";
       if (command) {
         commands.push(command);
-        this.data = this.data.split(command)?.[1] ?? this.data;
+        this.data = this.data.substring(
+          this.data.indexOf(command) + command.length
+        );
       }
     }
 
