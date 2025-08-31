@@ -14,9 +14,7 @@ export function lrange(args: string[]) {
   const indexStart = +args[1];
   const indexEnd = +args[2] + 1;
 
-  if (indexStart >= data.length || indexStart >= indexEnd) return EMPTY;
-
-  const items = data.slice(indexStart, indexEnd);
+  const items = data.slice(indexStart, indexEnd === 0 ? undefined : indexEnd);
 
   return `*${items.length}\r\n${items
     .map((item) => `$${item.length}\r\n${item}\r\n`)

@@ -13,7 +13,7 @@ export class RedisProtocol {
 
     for (let index = 0; index < commandsSize; index++) {
       const commandLength = this.data.match(/\$(\d+)\r\n/)?.[1] ?? 0;
-      const command = this.data.match(`\r\n(\\w{${commandLength}})\r\n`);
+      const command = this.data.match(`\r\n(?!\\$)(.{${commandLength}})\r\n`);
 
       if (command && command.length > 0) {
         const commandIndex = command.index ?? 0;
