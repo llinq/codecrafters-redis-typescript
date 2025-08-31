@@ -1,0 +1,20 @@
+import { EchoCommand } from "./base/echo";
+import { PingCommand } from "./base/ping";
+import { SetCommand } from "./base/set";
+import { GetCommand } from "./base/get";
+import { LpushCommand } from "./list/lpush";
+import { RpushCommand } from "./list/rpush";
+import { LrangeCommand } from "./list/lrange";
+import { LlenCommand } from "./list/llen";
+import { CommandFactory } from "./factory";
+import { LpopCommand } from "./list/lpop";
+
+CommandFactory.register(EchoCommand._type, EchoCommand);
+CommandFactory.register(PingCommand._type, PingCommand);
+CommandFactory.register(SetCommand._type, SetCommand);
+CommandFactory.register(GetCommand._type, GetCommand);
+CommandFactory.register(LpushCommand._type, LpushCommand);
+CommandFactory.register(RpushCommand._type, RpushCommand);
+CommandFactory.register(LrangeCommand._type, LrangeCommand);
+CommandFactory.register(LlenCommand._type, LlenCommand);
+CommandFactory.register(LpopCommand._type, LpopCommand);

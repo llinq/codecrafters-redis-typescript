@@ -1,4 +1,5 @@
-import { Command, CommandType } from "./commands/command";
+import type { Command } from "./command/command";
+import { createCommand } from "./command/factory";
 
 export class RedisProtocol {
   data: string;
@@ -25,8 +26,8 @@ export class RedisProtocol {
 
     if (commands.length === 0) throw "Invalid command";
 
-    const commandType = commands.shift() as CommandType;
+    const commandType = commands.shift() as string;
     const commandArgs = commands;
-    return new Command(commandType, commandArgs);
+    return createCommand(commandType, commandArgs);
   }
 }
