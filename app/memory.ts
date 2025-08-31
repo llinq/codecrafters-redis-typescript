@@ -12,7 +12,6 @@ export class MemoryStore {
   }
 
   set(key: string, value: string, expirationTime?: number): void {
-    console.log("-- set", key, expirationTime);
     this.store.set(key, { value, expirationTime, createdDate: new Date() });
   }
 
@@ -24,14 +23,8 @@ export class MemoryStore {
         item.expirationTime &&
         item.createdDate.getTime() + item.expirationTime > new Date().getTime()
       ) {
-        console.log(
-          "expiration time:",
-          item.createdDate.getTime() + item.expirationTime
-        );
-        console.log("get time:", new Date().getTime());
         return item.value;
       } else {
-        console.log("key expired");
         this.delete(key);
       }
     }

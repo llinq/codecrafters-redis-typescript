@@ -14,7 +14,7 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
     console.log("[server] command", command.commandType, command.params);
 
     const commandToWrite = command.runCommand();
-    console.log("command to write:", commandToWrite);
+    console.log("[server] command to write:", commandToWrite);
     if (commandToWrite) {
       connection.write(commandToWrite);
     }
