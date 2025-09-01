@@ -9,6 +9,7 @@ import { LlenCommand } from "./list/llen";
 import { CommandFactory } from "./factory";
 import { LpopCommand } from "./list/lpop";
 import { BlpopCommand } from "./list/blpop";
+import { TypeCommand } from "./base/type";
 
 CommandFactory.register(EchoCommand._type, EchoCommand);
 CommandFactory.register(PingCommand._type, PingCommand);
@@ -20,3 +21,4 @@ CommandFactory.register(LrangeCommand._type, LrangeCommand);
 CommandFactory.register(LlenCommand._type, LlenCommand);
 CommandFactory.register(LpopCommand._type, LpopCommand);
 CommandFactory.register(BlpopCommand._type, BlpopCommand);
+CommandFactory.register(TypeCommand._type, TypeCommand);
