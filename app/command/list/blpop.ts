@@ -1,8 +1,9 @@
-import { serverStore } from "../../store";
 import type { Command } from "../command";
+import { serverStore } from "../../store";
+import { WaitingClient } from "../../waiting-client";
 
 const TYPE = "BLPOP";
-const EMPTY = "$-1\r\n";
+const EMPTY = "*-1\r\n";
 
 export class BlpopCommand implements Command {
   static _type: string = TYPE;
@@ -20,26 +21,25 @@ export class BlpopCommand implements Command {
     const [key] = this.args;
     const timeout = +this.args[1];
 
-    let data: string[] | undefined;
+    const waitingClient = new WaitingClient(
+      key,
+      timeout > 0 ? timeout * 1000 : Infinity
+    );
 
-    return new Promise((resolve) => {
-      let connectionCloseIn = timeout > 0 ? timeout : Infinity;
-      const interval = setInterval(() => {
-        connectionCloseIn -= 1;
-        data = serverStore.get<string[]>(key);
+    waitingClient.queue();
+
+    return waitingClient.promise
+      .then((key) => {
+        const data = serverStore.get<string[]>(key);
         if (data && data.length > 0) {
           const length = data.length + 1;
-          resolve(
-            `*${length}\r\n$${key.length}\r\n${key}\r\n${data
-              .map((item) => `$${item.length}\r\n${item}\r\n`)
-              .join("")}`
-          );
-          clearInterval(interval);
-        } else if (connectionCloseIn === 0) {
-          resolve(EMPTY);
-          clearInterval(interval);
+          return `*${length}\r\n$${key.length}\r\n${key}\r\n${data
+            .map((item) => `$${item.length}\r\n${item}\r\n`)
+            .join("")}`;
+        } else {
+          return EMPTY;
         }
-      }, 1000);
-    });
+      })
+      .catch(() => EMPTY);
   }
 }

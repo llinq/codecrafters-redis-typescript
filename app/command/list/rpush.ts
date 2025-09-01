@@ -1,7 +1,8 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
+import { WaitingClient } from "../../waiting-client";
 
-const type = 'RPUSH';
+const type = "RPUSH";
 
 export class RpushCommand implements Command {
   static _type: string = type;
@@ -26,6 +27,12 @@ export class RpushCommand implements Command {
     }
 
     serverStore.set(key, data);
+
+    const queueItemToResolve = WaitingClient.dequeue(key);
+
+    if (queueItemToResolve) {
+      queueItemToResolve.resolve(key);
+    }
 
     return `:${data.length}\r\n`;
   }
