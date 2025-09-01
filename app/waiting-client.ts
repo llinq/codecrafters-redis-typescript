@@ -3,16 +3,15 @@ const WAITING_CLIENTS = new Map<string, WaitingClient[]>();
 export class WaitingClient {
   private _resolve!: (key: string) => void;
   private _reject!: () => void;
+  private _timeoutId?: NodeJS.Timeout;
 
   key: string;
   timeout: number;
   promise: Promise<string>;
-  completed: boolean;
 
   constructor(key: string, timeout: number) {
     this.key = key;
     this.timeout = timeout;
-    this.completed = false;
 
     this.promise = new Promise<string>((resolve, reject) => {
       this._resolve = resolve;
@@ -20,8 +19,8 @@ export class WaitingClient {
     });
 
     if (timeout !== Infinity) {
-      setTimeout(() => {
-        if (!this.completed) this.reject();
+      this._timeoutId = setTimeout(() => {
+        this.reject();
       }, this.timeout);
     }
   }
@@ -34,6 +33,12 @@ export class WaitingClient {
     return clientsForKey.shift();
   }
 
+  static clearAll() {
+    for (const clients of WAITING_CLIENTS.values()) {
+      clients.forEach((client) => client.reject());
+    }
+  }
+
   queue() {
     const clientsForKey = WAITING_CLIENTS.get(this.key) || [];
     clientsForKey.push(this);
@@ -41,12 +46,16 @@ export class WaitingClient {
   }
 
   resolve(key: string) {
-    this.completed = true;
-    this._resolve?.(key);
+    this._resolve(key);
+    this.clear();
   }
 
   reject() {
-    this.completed = true;
-    this._reject?.();
+    this._reject();
+    this.clear();
+  }
+
+  clear() {
+    if (this._timeoutId) clearInterval(this._timeoutId);
   }
 }

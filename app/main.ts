@@ -1,6 +1,7 @@
 import * as net from "net";
 import { RedisProtocol } from "./redis-protocol";
 import "./command/registry";
+import { WaitingClient } from "./waiting-client";
 
 const server: net.Server = net.createServer((connection: net.Socket) => {
   connection.on("data", async (data) => {
@@ -10,6 +11,10 @@ const server: net.Server = net.createServer((connection: net.Socket) => {
     if (commandToWrite) {
       connection.write(commandToWrite);
     }
+  });
+
+  connection.on("close", () => {
+    WaitingClient.clearAll();
   });
 });
 
