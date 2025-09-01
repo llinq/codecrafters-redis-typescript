@@ -21,13 +21,15 @@ export class LpushCommand implements Command {
 
     let data = serverStore.get<string[]>(key);
 
-    if (data && data instanceof Array) {
-      data = [...values, ...data];
+    let newValue: string[] = [];
+
+    if (data && data.value instanceof Array) {
+      newValue = [...values, ...data.value];
     } else {
-      data = [...values];
+      newValue = [...values];
     }
 
-    serverStore.set(key, data);
+    serverStore.set(key, newValue);
 
     const queueItemToResolve = WaitingClient.dequeue(key);
 
@@ -35,6 +37,6 @@ export class LpushCommand implements Command {
       queueItemToResolve.resolve(key);
     }
 
-    return `:${data.length}\r\n`;
+    return `:${newValue.length}\r\n`;
   }
 }

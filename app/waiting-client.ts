@@ -46,13 +46,13 @@ export class WaitingClient {
   }
 
   resolve(key: string) {
-    this._resolve(key);
     this.clear();
+    this._resolve(key);
   }
 
   reject() {
-    this._reject();
     this.clear();
+    this._reject();
   }
 
   clear() {

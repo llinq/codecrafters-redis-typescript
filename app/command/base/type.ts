@@ -20,7 +20,7 @@ export class TypeCommand implements Command {
     const data = serverStore.get(key);
 
     if (data) {
-      return `+${typeof data}\r\n`;
+      return `+${data.type}\r\n`;
     } else {
       return "+none\r\n";
     }

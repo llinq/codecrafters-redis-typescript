@@ -21,16 +21,16 @@ export class LpopCommand implements Command {
 
     const data = serverStore.get<string[]>(key);
 
-    if (!data || data.length === 0) return EMPTY;
+    if (!data || data.value.length === 0) return EMPTY;
 
     const response: string[] = [];
 
     for (let index = 0; index < removeLength; index++) {
-      const item = data.shift();
+      const item = data.value.shift();
       if (item) response.push(item);
     }
 
-    serverStore.set(key, data);
+    serverStore.set(key, data.value);
 
     if (response.length === 1)
       return `$${response[0].length}\r\n${response[0]}\r\n`;

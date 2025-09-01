@@ -20,13 +20,15 @@ export class RpushCommand implements Command {
 
     let data = serverStore.get<string[]>(key);
 
-    if (data && data instanceof Array) {
-      data.push(...values);
+    let newData: string[] = [];
+
+    if (data && data.value instanceof Array) {
+      newData = [...data.value, ...values];
     } else {
-      data = [...values];
+      newData = [...values];
     }
 
-    serverStore.set(key, data);
+    serverStore.set(key, newData);
 
     const queueItemToResolve = WaitingClient.dequeue(key);
 
@@ -34,6 +36,6 @@ export class RpushCommand implements Command {
       queueItemToResolve.resolve(key);
     }
 
-    return `:${data.length}\r\n`;
+    return `:${newData.length}\r\n`;
   }
 }

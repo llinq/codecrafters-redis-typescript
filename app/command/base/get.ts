@@ -1,7 +1,7 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
 
-const type = 'GET';
+const type = "GET";
 
 export class GetCommand implements Command {
   static _type: string = type;
@@ -14,9 +14,9 @@ export class GetCommand implements Command {
 
   run(): string {
     if (this.args.length !== 1) throw "GET command is invalid";
-    const storedValue = serverStore.get<string>(this.args[0]);
+    const storedValue = serverStore.get(this.args[0]);
     return storedValue
-      ? `$${storedValue.length}\r\n${storedValue}\r\n`
-      : "$/-1\r\n".replace("$/", "$");
+      ? `$${storedValue.value.length}\r\n${storedValue.value}\r\n`
+      : "$-1\r\n";
   }
 }

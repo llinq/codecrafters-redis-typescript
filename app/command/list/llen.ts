@@ -1,7 +1,7 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
 
-const type = 'LLEN';
+const type = "LLEN";
 
 export class LlenCommand implements Command {
   static _type: string = type;
@@ -18,10 +18,8 @@ export class LlenCommand implements Command {
     const key = this.args[0];
     const data = serverStore.get<string[]>(key);
 
-    if (!data || !data?.length) {
-      return ":0\r\n";
-    }
+    const length = data?.value?.length ?? 0;
 
-    return `:${data.length}\r\n`;
+    return `:${length}\r\n`;
   }
 }
