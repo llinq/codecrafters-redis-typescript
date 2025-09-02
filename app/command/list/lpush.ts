@@ -19,17 +19,23 @@ export class LpushCommand implements Command {
     const key = this.args[0];
     const values = this.args.slice(1).reverse();
 
-    let data = serverStore.get<string[]>(key);
+    let data = serverStore.get(key);
 
     let newValue: string[] = [];
 
-    if (data && data.value instanceof Array) {
+    if (data?.value && Array.isArray(data.value)) {
       newValue = [...values, ...data.value];
     } else {
       newValue = [...values];
     }
 
-    serverStore.set(key, newValue);
+    serverStore.set({
+      key,
+      data: {
+        type: "string",
+        value: newValue,
+      },
+    });
 
     const queueItemToResolve = WaitingClient.dequeue(key);
 

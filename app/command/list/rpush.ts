@@ -18,17 +18,23 @@ export class RpushCommand implements Command {
     const key = this.args[0];
     const values = this.args.slice(1);
 
-    let data = serverStore.get<string[]>(key);
+    let data = serverStore.get(key);
 
-    let newData: string[] = [];
+    let newValue: string[] = [];
 
-    if (data && data.value instanceof Array) {
-      newData = [...data.value, ...values];
+    if (data?.value && Array.isArray(data.value)) {
+      newValue = [...data.value, ...values];
     } else {
-      newData = [...values];
+      newValue = [...values];
     }
 
-    serverStore.set(key, newData);
+    serverStore.set({
+      key,
+      data: {
+        type: "string",
+        value: newValue,
+      },
+    });
 
     const queueItemToResolve = WaitingClient.dequeue(key);
 
@@ -36,6 +42,6 @@ export class RpushCommand implements Command {
       queueItemToResolve.resolve(key);
     }
 
-    return `:${newData.length}\r\n`;
+    return `:${newValue.length}\r\n`;
   }
 }

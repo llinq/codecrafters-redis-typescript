@@ -1,8 +1,16 @@
-type MemoryStateType = "string" | "object" | "stream";
+type MemoryStateData =
+  | {
+      type: "string";
+      value: string | string[];
+    }
+  | {
+      type: "stream";
+      id: string;
+      value: Map<string, string>;
+    };
 
-type MemoryState<T = unknown> = {
-  value: T;
-  type: MemoryStateType;
+type MemoryState = {
+  data: MemoryStateData;
   createdDate: Date;
   expirationTime?: number;
 };
@@ -14,28 +22,28 @@ export class MemoryStore {
     this.store = new Map();
   }
 
-  set(
-    key: string,
-    value: unknown,
-    options: { type?: MemoryStateType; expirationTime?: number } = {}
-  ): void {
-    this.store.set(key, {
-      value,
-      expirationTime: options.expirationTime,
+  set(params: {
+    key: string;
+    data: MemoryStateData;
+    options?: { expirationTime?: number };
+  }): void {
+    this.store.set(params.key, {
+      data: params.data,
+      expirationTime: params?.options?.expirationTime,
       createdDate: new Date(),
-      type: options.type ?? "string",
     });
   }
 
-  get<T = string>(key: string): MemoryState<T> | undefined {
+  get(key: string): MemoryStateData | undefined {
     const item = this.store.get(key);
+
     if (item) {
-      if (!item.expirationTime) return <MemoryState<T>>item;
+      if (!item.expirationTime) return item.data;
       else if (
         item.expirationTime &&
         item.createdDate.getTime() + item.expirationTime > new Date().getTime()
       ) {
-        return <MemoryState<T>>item;
+        return item.data;
       } else {
         this.delete(key);
       }

@@ -19,9 +19,11 @@ export class LpopCommand implements Command {
     const [key] = this.args;
     const removeLength = this.args[1] ? +this.args[1] : 1;
 
-    const data = serverStore.get<string[]>(key);
+    const data = serverStore.get(key);
 
-    if (!data || data.value.length === 0) return EMPTY;
+    if (!data?.value || !Array.isArray(data.value) || data.value.length === 0) {
+      return EMPTY;
+    }
 
     const response: string[] = [];
 
@@ -30,7 +32,7 @@ export class LpopCommand implements Command {
       if (item) response.push(item);
     }
 
-    serverStore.set(key, data.value);
+    serverStore.set({ key, data });
 
     if (response.length === 1)
       return `$${response[0].length}\r\n${response[0]}\r\n`;

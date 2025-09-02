@@ -16,7 +16,14 @@ export class SetCommand implements Command {
     if (this.args.length < 2) throw "SET command is invalid";
     const [key, value] = this.args;
     const expiration = this.args.length > 3 ? +this.args[3] : undefined;
-    serverStore.set(key, value, { expirationTime: expiration });
+    serverStore.set({
+      key,
+      data: {
+        type: "string",
+        value,
+      },
+      options: { expirationTime: expiration },
+    });
     return "+OK\r\n";
   }
 }

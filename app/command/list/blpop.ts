@@ -30,8 +30,8 @@ export class BlpopCommand implements Command {
 
     return waitingClient.promise
       .then((key) => {
-        const data = serverStore.get<string[]>(key);
-        if (data && data.value.length > 0) {
+        const data = serverStore.get(key);
+        if (data && Array.isArray(data.value) && data.value.length > 0) {
           const length = data.value.length + 1;
           return `*${length}\r\n$${key.length}\r\n${key}\r\n${data.value
             .map((item) => `$${item.length}\r\n${item}\r\n`)
