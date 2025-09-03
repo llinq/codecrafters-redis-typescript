@@ -26,7 +26,7 @@ export class XaddCommand implements Command {
 
     const [millisecondsTime, sequenceNumber] = newId.split("-");
     const newMillisecondsTime = Number(millisecondsTime);
-    const newSequenceNumber = Number(sequenceNumber);
+    let newSequenceNumber = Number(sequenceNumber);
 
     if (newMillisecondsTime === 0 && newSequenceNumber === 0) {
       throw `-ERR The ID specified in XADD must be greater than 0-0\r\n`;
@@ -34,24 +34,33 @@ export class XaddCommand implements Command {
 
     const data = serverStore.get(key);
 
-    if (!data) return defaultId;
+    if (data && data.type !== "stream")
+      throw "The key specified is not an stream";
 
-    if (data.type !== "stream") throw "The key specified is not an stream";
-
-    const lastKey = Array.from(data.value.keys()).pop();
+    const existingKeys = Array.from(data ? data.value.keys() : []);
 
     if (
-      lastKey?.millisecondsTime &&
-      lastKey.millisecondsTime >= newMillisecondsTime
+      existingKeys.some(
+        (existingKey) =>
+          existingKey.millisecondsTime > newMillisecondsTime ||
+          existingKey.sequenceNumber >= newSequenceNumber
+      )
     ) {
       throw "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
     }
 
-    if (
-      lastKey?.sequenceNumber &&
-      lastKey.sequenceNumber >= newSequenceNumber
-    ) {
-      throw "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
+    const lastKey = existingKeys
+      .filter((key) => key.millisecondsTime === newMillisecondsTime)
+      .pop();
+
+    if (sequenceNumber === "*") {
+      if (lastKey?.sequenceNumber !== undefined) {
+        newSequenceNumber = lastKey.sequenceNumber + 1;
+      } else if (newMillisecondsTime === 0) {
+        newSequenceNumber = 1;
+      } else {
+        newSequenceNumber = 0;
+      }
     }
 
     return {
@@ -96,7 +105,7 @@ export class XaddCommand implements Command {
         },
       });
 
-      return `$${id.length}\r\n${id}\r\n`;
+      return `$${id.length}\r\n${newId.millisecondsTime}-${newId.sequenceNumber}\r\n`;
     } catch (error: unknown) {
       if (typeof error === "string") {
         return error;
