@@ -1,3 +1,10 @@
+export type StreamId = {
+  millisecondsTime: number;
+  sequenceNumber: number;
+};
+
+export class StreamValue extends Map<StreamId, Map<string, string>> {}
+
 type MemoryStateData =
   | {
       type: "string";
@@ -5,8 +12,7 @@ type MemoryStateData =
     }
   | {
       type: "stream";
-      id: string;
-      value: Map<string, string>;
+      value: StreamValue;
     };
 
 type MemoryState = {
