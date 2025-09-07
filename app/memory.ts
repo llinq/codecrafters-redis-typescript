@@ -5,7 +5,7 @@ export type StreamId = {
 
 export class StreamValue extends Map<StreamId, Map<string, string>> {}
 
-type MemoryStateData =
+export type MemoryStateData =
   | {
       type: "string";
       value: string | string[];

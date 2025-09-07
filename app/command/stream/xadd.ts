@@ -1,4 +1,4 @@
-import { StreamValue, type StreamId } from "../../memory";
+import { StreamValue, type MemoryStateData, type StreamId } from "../../memory";
 import { serverStore } from "../../store";
 import type { Command } from "../command";
 
@@ -14,14 +14,36 @@ export class XaddCommand implements Command {
     this.args = args;
   }
 
-  validateNewId(key: string, newId: string): StreamId {
-    const defaultId: StreamId = {
-      millisecondsTime: 0,
-      sequenceNumber: 1,
-    };
+  getDataValue(key: string): StreamValue | undefined {
+    const data = serverStore.get(key);
 
+    if (data && data.type !== "stream")
+      throw "The key specified is not an stream";
+
+    return data?.value;
+  }
+
+  validateNewId(key: string, newId: string): StreamId {
     if (newId === "*") {
-      return defaultId;
+      const newMillisecondsTime: number = new Date().getTime();
+      let newSequenceNumber: number = 0;
+
+      const data = this.getDataValue(key);
+
+      const existingKeys = Array.from(data ? data.keys() : []);
+
+      const lastKey = existingKeys
+        .filter((key) => key.millisecondsTime === newMillisecondsTime)
+        .pop();
+
+      if (lastKey) {
+        newSequenceNumber = lastKey.sequenceNumber + 1;
+      }
+
+      return {
+        millisecondsTime: newMillisecondsTime,
+        sequenceNumber: newSequenceNumber,
+      };
     }
 
     const [millisecondsTime, sequenceNumber] = newId.split("-");
@@ -32,12 +54,9 @@ export class XaddCommand implements Command {
       throw `-ERR The ID specified in XADD must be greater than 0-0\r\n`;
     }
 
-    const data = serverStore.get(key);
+    const data = this.getDataValue(key);
 
-    if (data && data.type !== "stream")
-      throw "The key specified is not an stream";
-
-    const existingKeys = Array.from(data ? data.value.keys() : []);
+    const existingKeys = Array.from(data ? data.keys() : []);
 
     if (
       existingKeys.some(
@@ -105,7 +124,9 @@ export class XaddCommand implements Command {
         },
       });
 
-      return `$${id.length}\r\n${newId.millisecondsTime}-${newId.sequenceNumber}\r\n`;
+      const respBulkString = `${newId.millisecondsTime}-${newId.sequenceNumber}`;
+
+      return `$${respBulkString.length}\r\n${respBulkString}\r\n`;
     } catch (error: unknown) {
       if (typeof error === "string") {
         return error;
