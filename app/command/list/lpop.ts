@@ -1,8 +1,8 @@
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import { serverStore } from "../../store";
 import type { Command } from "../command";
 
 const type = "LPOP";
-const EMPTY = "$-1\r\n";
 
 export class LpopCommand implements Command {
   static _type: string = type;
@@ -22,7 +22,7 @@ export class LpopCommand implements Command {
     const data = serverStore.get(key);
 
     if (!data?.value || !Array.isArray(data.value) || data.value.length === 0) {
-      return EMPTY;
+      return RedisProtocolResponse.nullArray();
     }
 
     const response: string[] = [];
@@ -34,11 +34,10 @@ export class LpopCommand implements Command {
 
     serverStore.set({ key, data });
 
-    if (response.length === 1)
-      return `$${response[0].length}\r\n${response[0]}\r\n`;
-    else
-      return `*${response.length}\r\n${response
-        .map((item) => `$${item.length}\r\n${item}\r\n`)
-        .join("")}`;
+    if (response.length === 1) {
+      return RedisProtocolResponse.simpleBulkString(response[0]);
+    } else {
+      return RedisProtocolResponse.array(response);
+    }
   }
 }

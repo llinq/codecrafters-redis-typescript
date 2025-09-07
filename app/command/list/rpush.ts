@@ -1,6 +1,7 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
 import { WaitingClient } from "../../waiting-client";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
 const type = "RPUSH";
 
@@ -42,6 +43,6 @@ export class RpushCommand implements Command {
       queueItemToResolve.resolve(key);
     }
 
-    return `:${newValue.length}\r\n`;
+    return RedisProtocolResponse.integer(newValue.length);
   }
 }

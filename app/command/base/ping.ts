@@ -1,6 +1,7 @@
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import type { Command } from "../command";
 
-const type = 'PING';
+const type = "PING";
 
 export class PingCommand implements Command {
   static _type: string = type;
@@ -12,6 +13,6 @@ export class PingCommand implements Command {
   }
 
   run(): string {
-    return "+PONG\r\n";
+    return RedisProtocolResponse.simpleString("PONG");
   }
 }

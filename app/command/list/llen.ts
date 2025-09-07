@@ -1,8 +1,8 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
 const type = "LLEN";
-const EMPTY = ":0\r\n";
 
 export class LlenCommand implements Command {
   static _type: string = type;
@@ -20,9 +20,9 @@ export class LlenCommand implements Command {
     const data = serverStore.get(key);
 
     if (!data?.value || !Array.isArray(data.value) || data.value.length === 0) {
-      return EMPTY;
+      return RedisProtocolResponse.integer(0);
     }
 
-    return `:${data.value.length}\r\n`;
+    return RedisProtocolResponse.integer(data.value.length);
   }
 }

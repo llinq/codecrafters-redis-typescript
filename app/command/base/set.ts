@@ -1,5 +1,6 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
 const type = "SET";
 
@@ -24,6 +25,6 @@ export class SetCommand implements Command {
       },
       options: { expirationTime: expiration },
     });
-    return "+OK\r\n";
+    return RedisProtocolResponse.simpleString("OK");
   }
 }

@@ -1,3 +1,4 @@
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import { serverStore } from "../../store";
 import type { Command } from "../command";
 
@@ -19,10 +20,6 @@ export class TypeCommand implements Command {
 
     const data = serverStore.get(key);
 
-    if (data) {
-      return `+${data.type}\r\n`;
-    } else {
-      return "+none\r\n";
-    }
+    return RedisProtocolResponse.simpleString(data ? data.type : 'none');
   }
 }

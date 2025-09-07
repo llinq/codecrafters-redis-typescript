@@ -1,5 +1,6 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
 const type = "GET";
 
@@ -17,13 +18,18 @@ export class GetCommand implements Command {
     const storedValue = serverStore.get(this.args[0]);
 
     if (!storedValue?.value) {
-      return "$-1\r\n";
+      return RedisProtocolResponse.nullBulkString();
     }
 
-    if (storedValue.value instanceof Map) {
-      return `$${storedValue.value.size}\r\n${storedValue.value}\r\n`;
+    if (storedValue.value instanceof Map && storedValue.type === "string") {
+      return RedisProtocolResponse.simpleBulkString(
+        storedValue.value.toString(),
+        storedValue.value.size
+      );
     } else {
-      return `$${storedValue.value.length}\r\n${storedValue.value}\r\n`;
+      return RedisProtocolResponse.simpleBulkString(
+        storedValue.value.toString()
+      );
     }
   }
 }

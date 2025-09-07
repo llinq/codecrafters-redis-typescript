@@ -1,7 +1,7 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
-const EMPTY = "*0\r\n";
 const type = "LRANGE";
 
 export class LrangeCommand implements Command {
@@ -20,7 +20,7 @@ export class LrangeCommand implements Command {
     const data = serverStore.get(key);
 
     if (!data?.value || !Array.isArray(data.value) || data.value.length === 0) {
-      return EMPTY;
+      return RedisProtocolResponse.array([]);
     }
 
     const indexStart = +this.args[1];
@@ -31,8 +31,6 @@ export class LrangeCommand implements Command {
       indexEnd === 0 ? undefined : indexEnd
     );
 
-    return `*${items.length}\r\n${items
-      .map((item) => `$${item.length}\r\n${item}\r\n`)
-      .join("")}`;
+    return RedisProtocolResponse.array(items);
   }
 }

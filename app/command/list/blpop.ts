@@ -1,9 +1,9 @@
 import type { Command } from "../command";
 import { serverStore } from "../../store";
 import { WaitingClient } from "../../waiting-client";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 
 const TYPE = "BLPOP";
-const EMPTY = "*-1\r\n";
 
 export class BlpopCommand implements Command {
   static _type: string = TYPE;
@@ -32,14 +32,11 @@ export class BlpopCommand implements Command {
       .then((key) => {
         const data = serverStore.get(key);
         if (data && Array.isArray(data.value) && data.value.length > 0) {
-          const length = data.value.length + 1;
-          return `*${length}\r\n$${key.length}\r\n${key}\r\n${data.value
-            .map((item) => `$${item.length}\r\n${item}\r\n`)
-            .join("")}`;
+          return RedisProtocolResponse.arrayWithKey(key, data.value);
         } else {
-          return EMPTY;
+          return RedisProtocolResponse.nullArray();
         }
       })
-      .catch(() => EMPTY);
+      .catch(() => RedisProtocolResponse.nullArray());
   }
 }

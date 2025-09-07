@@ -1,9 +1,10 @@
 import { StreamValue, type MemoryStateData, type StreamId } from "../../memory";
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import { serverStore } from "../../store";
 import type { Command } from "../command";
 
 const TYPE = "XADD";
-const EMPTY = "*-1\r\n";
+// const EMPTY = "*-1\r\n";
 
 export class XaddCommand implements Command {
   static _type = TYPE;
@@ -51,7 +52,7 @@ export class XaddCommand implements Command {
     let newSequenceNumber = Number(sequenceNumber);
 
     if (newMillisecondsTime === 0 && newSequenceNumber === 0) {
-      throw `-ERR The ID specified in XADD must be greater than 0-0\r\n`;
+      throw `ERR The ID specified in XADD must be greater than 0-0\r\n`;
     }
 
     const data = this.getDataValue(key);
@@ -65,7 +66,7 @@ export class XaddCommand implements Command {
           existingKey.sequenceNumber >= newSequenceNumber
       )
     ) {
-      throw "-ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
+      throw "ERR The ID specified in XADD is equal or smaller than the target stream top item\r\n";
     }
 
     const lastKey = existingKeys
@@ -129,12 +130,12 @@ export class XaddCommand implements Command {
       return `$${respBulkString.length}\r\n${respBulkString}\r\n`;
     } catch (error: unknown) {
       if (typeof error === "string") {
-        return error;
+        return RedisProtocolResponse.simpleError(error);
       }
       if (error instanceof Error) {
-        return error.message;
+        return RedisProtocolResponse.simpleError(error.message);
       }
-      return "An unknown error occurred";
+      return RedisProtocolResponse.simpleError("An unknown error occurred");
     }
   }
 }

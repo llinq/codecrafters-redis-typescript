@@ -1,6 +1,7 @@
+import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import type { Command } from "../command";
 
-const type = 'ECHO';
+const type = "ECHO";
 
 export class EchoCommand implements Command {
   static _type: string = type;
@@ -14,6 +15,6 @@ export class EchoCommand implements Command {
   run(): string {
     if (this.args.length !== 1) throw "ECHO command is invalid";
     const msg = this.args[0];
-    return `$${msg.length}\r\n${msg}\r\n`;
+    return RedisProtocolResponse.simpleString(msg);
   }
 }

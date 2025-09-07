@@ -1,5 +1,5 @@
 import * as net from "net";
-import { RedisProtocol } from "./redis-protocol";
+import { RedisProtocol } from "./redis-protocol/redis-protocol";
 import "./command/registry";
 import { WaitingClient } from "./waiting-client";
 
