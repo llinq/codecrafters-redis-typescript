@@ -51,7 +51,7 @@ export class RedisProtocolResponse {
   }
 
   /**
-    Return "*<number{of-elements}\r\n{element-1}...{element-n}"
+    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
   */
   static arrayWithKey(key: string, values: string[]) {
     return (
@@ -68,7 +68,7 @@ export class RedisProtocolResponse {
   }
 
   /**
-    Return "*<number{of-elements}\r\n{element-1}...{element-n}"
+    Return "*{number-of-elements}\r\n{element-1}...{element-n}"
   */
   static array(values: string[]) {
     return (
