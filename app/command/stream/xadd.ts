@@ -4,7 +4,6 @@ import { serverStore } from "../../store";
 import type { Command } from "../command";
 
 const TYPE = "XADD";
-// const EMPTY = "*-1\r\n";
 
 export class XaddCommand implements Command {
   static _type = TYPE;

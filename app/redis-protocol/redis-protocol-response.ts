@@ -1,15 +1,17 @@
+import type { StreamValue } from "../memory";
+
 const cr_lf = "\r\n";
 
 export class RedisProtocolResponse {
   /**
-   {Return "+<value}\r\n"
+   {Return "+{value}\r\n"
   */
   static simpleString(value: string) {
     return "+" + value + cr_lf;
   }
 
   /**
-   {Return "-<error}"
+   {Return "-{error}"
   */
   static simpleError(error: string) {
     return "-" + error;
@@ -53,30 +55,55 @@ export class RedisProtocolResponse {
   /**
     Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
   */
-  static arrayWithKey(key: string, values: string[]) {
+  static arrayWithKey(key: string, values: string[] | Array<string[]>) {
     return (
       "*" +
       (values.length + 1) +
       cr_lf +
-      "$" +
-      key.length +
-      cr_lf +
-      key +
-      cr_lf +
-      values.map((value) => this.simpleBulkString(value)).join("")
+      this.simpleBulkString(key) +
+      values
+        .map((value) => {
+          if (Array.isArray(value)) return this.array(value);
+          else return this.simpleBulkString(value);
+        })
+        .join("")
     );
   }
 
   /**
     Return "*{number-of-elements}\r\n{element-1}...{element-n}"
   */
-  static array(values: string[]) {
-    return (
-      "*" +
-      values.length +
-      cr_lf +
-      values.map((value) => this.simpleBulkString(value)).join("")
-    );
+  static array(values: StreamValue): string;
+
+  /**
+    Return "*{number-of-elements}\r\n{element-1}...{element-n}"
+  */
+  static array(values: string[]): string;
+
+  static array(values: string[] | StreamValue) {
+    if (Array.isArray(values)) {
+      return (
+        "*" +
+        values.length +
+        cr_lf +
+        values.map((value) => this.simpleBulkString(value)).join("")
+      );
+    } else {
+      return (
+        "*" +
+        values.size +
+        cr_lf +
+        values
+          .entries()
+          .map(([key, value]) => {
+            const id = `${key.millisecondsTime}-${key.sequenceNumber}`;
+            const values = Array.from(value.entries());
+            return this.arrayWithKey(id, values);
+          })
+          .toArray()
+          .join("")
+      );
+    }
   }
 
   /**
