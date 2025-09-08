@@ -12,6 +12,7 @@ import { BlpopCommand } from "./list/blpop";
 import { TypeCommand } from "./base/type";
 import { XaddCommand } from "./stream/xadd";
 import { XrangeCommand } from "./stream/xrange";
+import { XreadCommand } from "./stream/xread";
 
 CommandFactory.register(EchoCommand._type, EchoCommand);
 CommandFactory.register(PingCommand._type, PingCommand);
@@ -26,3 +27,4 @@ CommandFactory.register(BlpopCommand._type, BlpopCommand);
 CommandFactory.register(TypeCommand._type, TypeCommand);
 CommandFactory.register(XaddCommand._type, XaddCommand);
 CommandFactory.register(XrangeCommand._type, XrangeCommand);
+CommandFactory.register(XreadCommand._type, XreadCommand);
