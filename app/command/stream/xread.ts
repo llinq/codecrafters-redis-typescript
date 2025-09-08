@@ -32,8 +32,8 @@ export class XreadCommand implements Command {
       .entries()
       .filter(
         ([id]) =>
-          id.millisecondsTime === millisecondsTime &&
-          id.sequenceNumber === sequenceNumber
+          id.millisecondsTime >= millisecondsTime &&
+          id.sequenceNumber >= sequenceNumber
       );
 
     return RedisProtocolResponse.array(new StreamValue(items));
