@@ -24,15 +24,27 @@ export class XrangeCommand implements Command {
     if (!data || data.type !== "stream")
       throw "The key specified is not an stream";
 
-    const startFilter: StreamId = {
-      millisecondsTime: +start.split("-")[0],
-      sequenceNumber: +start.split("-")[1] || 0,
-    };
+    const startFilter: StreamId =
+      start === "-"
+        ? {
+            millisecondsTime: 0,
+            sequenceNumber: 0,
+          }
+        : {
+            millisecondsTime: +start.split("-")[0],
+            sequenceNumber: +start.split("-")[1] || 0,
+          };
 
-    const endFilter: StreamId = {
-      millisecondsTime: +end.split("-")[0],
-      sequenceNumber: +end.split("-")[1] || 0,
-    };
+    const endFilter: StreamId =
+      end === "+"
+        ? {
+            millisecondsTime: Infinity,
+            sequenceNumber: Infinity,
+          }
+        : {
+            millisecondsTime: +end.split("-")[0],
+            sequenceNumber: +end.split("-")[1] || 0,
+          };
 
     const items = data.value
       .entries()
