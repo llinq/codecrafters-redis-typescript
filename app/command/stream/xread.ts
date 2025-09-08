@@ -1,4 +1,4 @@
-import { StreamValue } from "../../memory";
+import { StreamValue, type StreamId } from "../../memory";
 import { RedisProtocolResponse } from "../../redis-protocol/redis-protocol-response";
 import { serverStore } from "../../store";
 import type { Command } from "../command";
@@ -15,27 +15,41 @@ export class XreadCommand implements Command {
   }
 
   run(): string {
-    if (this.args.length !== 3) throw "XRead command is invalid";
+    if (this.args.length < 3) throw "XRead command is invalid";
 
-    const [_, key, streamId] = this.args;
+    const [_, ...streams] = this.args;
 
-    const data = serverStore.get(key);
+    const halfIndex = Math.floor(streams.length / 2);
+    const keysToRead = streams.slice(0, halfIndex);
+    const idsToRead = streams.slice(halfIndex);
 
-    if (!data) throw "The specified key dont exists";
+    const items: Map<string, StreamValue> = new Map();
 
-    if (data.type !== "stream") throw "The key specified is not an stream";
+    for (let index = 0; index < halfIndex; index++) {
+      const key = keysToRead[index];
+      const id = idsToRead[index];
 
-    const millisecondsTime = +streamId.split("-")[0];
-    const sequenceNumber = +streamId.split("-")[1];
+      const data = serverStore.get(key);
 
-    const items = data.value
-      .entries()
-      .filter(
-        ([id]) =>
-          id.millisecondsTime >= millisecondsTime &&
-          id.sequenceNumber >= sequenceNumber
-      );
+      if (!data) throw "The specified key dont exists";
 
-    return RedisProtocolResponse.arrayWithKey(key, new StreamValue(items));
+      if (data.type !== "stream") throw "The key specified is not an stream";
+
+      const millisecondsTime = +id.split("-")[0];
+      const sequenceNumber = +id.split("-")[1];
+
+      const values = data.value
+        .entries()
+        .filter(
+          ([id]) =>
+            id.millisecondsTime >= millisecondsTime &&
+            id.sequenceNumber >= sequenceNumber
+        )
+        .toArray();
+
+      items.set(key, new StreamValue(values));
+    }
+
+    return RedisProtocolResponse.arrayWithKey(items);
   }
 }

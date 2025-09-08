@@ -32,7 +32,7 @@ export class BlpopCommand implements Command {
       .then((key) => {
         const data = serverStore.get(key);
         if (data && Array.isArray(data.value) && data.value.length > 0) {
-          return RedisProtocolResponse.arrayWithKey(key, data.value);
+          return RedisProtocolResponse.array([key, ...data.value]);
         } else {
           return RedisProtocolResponse.nullArray();
         }

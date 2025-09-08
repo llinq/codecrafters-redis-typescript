@@ -53,62 +53,6 @@ export class RedisProtocolResponse {
   }
 
   /**
-    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
-  */
-  static arrayWithKey(key: string, values: string[]): string;
-
-  /**
-    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
-  */
-  static arrayWithKey(key: string, values: string[][]): string;
-
-  /**
-    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
-  */
-  static arrayWithKey(key: string, values: StreamValue): string;
-
-  static arrayWithKey(
-    key: string,
-    values: string[] | string[][] | StreamValue
-  ) {
-    if (values instanceof StreamValue) {
-      const length: number = values.size;
-      const items: string[] = values
-        .entries()
-        .map(([id, value]) =>
-          this.arrayWithKey(
-            `${id.millisecondsTime}-${id.sequenceNumber}`,
-            Array.from(value.entries())
-          )
-        )
-        .toArray();
-
-      const response =
-        "*" +
-        length +
-        cr_lf +
-        "*" +
-        (items.length + 1) +
-        cr_lf +
-        this.simpleBulkString(key) +
-        "*" +
-        items.length +
-        cr_lf +
-        items.join("");
-
-      return response;
-    } else {
-      const length: number = values.length + 1;
-      const items: string[] = values.map((value) => {
-        if (Array.isArray(value)) return this.array(value);
-        else return this.simpleBulkString(value);
-      });
-
-      return "*" + length + cr_lf + this.simpleBulkString(key) + items.join("");
-    }
-  }
-
-  /**
     Return "*{number-of-elements}\r\n{element-1}...{element-n}"
   */
   static array(values: StreamValue): string;
@@ -136,11 +80,62 @@ export class RedisProtocolResponse {
           .map(([key, value]) => {
             const id = `${key.millisecondsTime}-${key.sequenceNumber}`;
             const values = Array.from(value.entries());
-            return this.arrayWithKey(id, values);
+            return this.generateArrayWithKey(id, values);
           })
           .toArray()
           .join("")
       );
+    }
+  }
+
+  /**
+    Return "*{number-of-elements}\r\n{element-1}...{element-n}"
+  */
+  static arrayWithKey(data: Map<string, StreamValue>): string {
+    let response: string = "";
+
+    for (const [key, values] of data.entries()) {
+      response += this.generateArrayWithKey(key, values);
+    }
+
+    return "*" + data.size + cr_lf + response;
+  }
+
+  private static generateArrayWithKey(
+    key: string,
+    values: string[] | string[][] | StreamValue
+  ) {
+    if (values instanceof StreamValue) {
+      const length: number = values.size;
+      const items: string[] = values
+        .entries()
+        .map(([id, value]) =>
+          this.generateArrayWithKey(
+            `${id.millisecondsTime}-${id.sequenceNumber}`,
+            Array.from(value.entries())
+          )
+        )
+        .toArray();
+
+      const response =
+        "*" +
+        (items.length + 1) +
+        cr_lf +
+        this.simpleBulkString(key) +
+        "*" +
+        items.length +
+        cr_lf +
+        items.join("");
+
+      return response;
+    } else {
+      const length: number = values.length + 1;
+      const items: string[] = values.map((value) => {
+        if (Array.isArray(value)) return this.array(value);
+        else return this.simpleBulkString(value);
+      });
+
+      return "*" + length + cr_lf + this.simpleBulkString(key) + items.join("");
     }
   }
 
