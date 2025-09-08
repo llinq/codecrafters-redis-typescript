@@ -25,8 +25,8 @@ export class XreadCommand implements Command {
 
     if (data.type !== "stream") throw "The key specified is not an stream";
 
-    const millisecondsTime = +key.split("-")[0];
-    const sequenceNumber = +key.split("-")[1];
+    const millisecondsTime = +streamId.split("-")[0];
+    const sequenceNumber = +streamId.split("-")[1];
 
     const items = data.value
       .entries()
@@ -36,6 +36,6 @@ export class XreadCommand implements Command {
           id.sequenceNumber >= sequenceNumber
       );
 
-    return RedisProtocolResponse.array(new StreamValue(items));
+    return RedisProtocolResponse.arrayWithKey(key, new StreamValue(items));
   }
 }

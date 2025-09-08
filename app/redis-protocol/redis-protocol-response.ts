@@ -1,4 +1,4 @@
-import type { StreamValue } from "../memory";
+import { StreamValue } from "../memory";
 
 const cr_lf = "\r\n";
 
@@ -55,19 +55,57 @@ export class RedisProtocolResponse {
   /**
     Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
   */
-  static arrayWithKey(key: string, values: string[] | Array<string[]>) {
-    return (
-      "*" +
-      (values.length + 1) +
-      cr_lf +
-      this.simpleBulkString(key) +
-      values
-        .map((value) => {
-          if (Array.isArray(value)) return this.array(value);
-          else return this.simpleBulkString(value);
-        })
-        .join("")
-    );
+  static arrayWithKey(key: string, values: string[]): string;
+
+  /**
+    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
+  */
+  static arrayWithKey(key: string, values: string[][]): string;
+
+  /**
+    Return "*{number-of-elements + 1}\r\n{key.length}\r\n{key}\r\n{element-1}...{element-n}"
+  */
+  static arrayWithKey(key: string, values: StreamValue): string;
+
+  static arrayWithKey(
+    key: string,
+    values: string[] | string[][] | StreamValue
+  ) {
+    if (values instanceof StreamValue) {
+      const length: number = values.size;
+      const items: string[] = values
+        .entries()
+        .map(([id, value]) =>
+          this.arrayWithKey(
+            `${id.millisecondsTime}-${id.sequenceNumber}`,
+            Array.from(value.entries())
+          )
+        )
+        .toArray();
+
+      const response =
+        "*" +
+        length +
+        cr_lf +
+        "*" +
+        (items.length + 1) +
+        cr_lf +
+        this.simpleBulkString(key) +
+        "*" +
+        items.length +
+        cr_lf +
+        items.join("");
+
+      return response;
+    } else {
+      const length: number = values.length + 1;
+      const items: string[] = values.map((value) => {
+        if (Array.isArray(value)) return this.array(value);
+        else return this.simpleBulkString(value);
+      });
+
+      return "*" + length + cr_lf + this.simpleBulkString(key) + items.join("");
+    }
   }
 
   /**
